@@ -330,9 +330,226 @@ select.inp{
 }
 .bn.active{color:var(--blue);}
 .bn-ico{font-size:24px;line-height:1;}
+
+/* ══ LOGIN SCREEN ═══════════════════════════════════════ */
+.login-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#e8eaf6 0%,#f0f2f7 50%,#e8f4fd 100%);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.login-screen.hidden{display:none;}
+
+.login-card{
+  background:#fff;border-radius:20px;
+  box-shadow:0 8px 40px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);
+  width:100%;max-width:380px;overflow:hidden;
+}
+.login-header{
+  background:linear-gradient(135deg,#1d4ed8,#3b82f6);
+  padding:28px 28px 24px;text-align:center;
+}
+.login-logo{font-size:36px;margin-bottom:8px;}
+.login-title{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.login-subtitle{font-size:12px;color:rgba(255,255,255,.75);margin-top:4px;}
+
+.login-body{padding:24px 24px 28px;}
+
+/* USER PICKER */
+.user-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin-bottom:10px;}
+.user-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+.user-btn{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-radius:12px;cursor:pointer;
+  border:2px solid var(--border);background:var(--surface2);
+  transition:all .15s;-webkit-tap-highlight-color:transparent;
+  text-align:left;font-family:inherit;width:100%;
+}
+.user-btn:hover,.user-btn:active{border-color:var(--blue);background:var(--blue-bg);}
+.user-btn.selected{border-color:var(--blue);background:var(--blue-bg);}
+.user-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.user-info-name{font-size:14px;font-weight:700;color:var(--text);}
+.user-info-status{font-size:11px;color:var(--text3);margin-top:1px;}
+.user-info-status.set{color:var(--green);font-weight:600;}
+
+/* PASSWORD SECTION */
+.pw-section{display:none;}
+.pw-section.show{display:block;}
+.pw-back{
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:700;color:var(--blue);
+  background:none;border:none;cursor:pointer;
+  font-family:inherit;padding:0;margin-bottom:14px;
+  -webkit-tap-highlight-color:transparent;
+}
+.pw-who{
+  background:var(--blue-bg);border:1.5px solid #bfdbfe;
+  border-radius:10px;padding:10px 14px;margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+}
+.pw-who-name{font-size:14px;font-weight:800;color:var(--blue);}
+.pw-who-sub{font-size:11px;color:#3b82f6;margin-top:1px;}
+.pw-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.pw-desc{font-size:11.5px;color:var(--text3);margin-bottom:14px;line-height:1.5;}
+.pw-field{position:relative;margin-bottom:12px;}
+.pw-field .inp{padding-right:44px;}
+.pw-toggle{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:16px;
+  color:var(--text3);padding:4px;-webkit-tap-highlight-color:transparent;
+}
+.pw-error{
+  background:var(--red-bg);border:1.5px solid #fca5a5;
+  border-radius:8px;padding:9px 12px;
+  font-size:12px;font-weight:600;color:var(--red);
+  margin-bottom:12px;display:none;
+}
+.pw-error.show{display:block;}
+
+/* LUPA PASSWORD */
+.forgot-link{
+  text-align:center;margin-top:12px;
+  font-size:12px;color:var(--text3);
+}
+.forgot-link button{
+  background:none;border:none;color:var(--blue);
+  font-size:12px;font-weight:700;cursor:pointer;
+  font-family:inherit;text-decoration:underline;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* FORGOT MODAL */
+.modal-overlay{
+  position:fixed;inset:0;z-index:10000;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.modal-overlay.hidden{display:none;}
+.modal-box{
+  background:#fff;border-radius:16px;
+  box-shadow:0 8px 40px rgba(0,0,0,.2);
+  width:100%;max-width:340px;padding:24px;
+}
+.modal-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;}
+.modal-desc{font-size:12.5px;color:var(--text2);margin-bottom:16px;line-height:1.6;}
+.modal-code{
+  font-family:'DM Mono',monospace;font-size:22px;font-weight:800;
+  text-align:center;letter-spacing:6px;color:var(--blue);
+  background:var(--blue-bg);border-radius:10px;
+  padding:14px;margin-bottom:16px;
+}
+.modal-note{font-size:11px;color:var(--text3);text-align:center;margin-bottom:16px;}
+.modal-btns{display:flex;gap:8px;}
+.modal-btn{
+  flex:1;padding:11px;border:none;border-radius:9px;
+  font-size:13px;font-weight:700;cursor:pointer;
+  font-family:inherit;-webkit-tap-highlight-color:transparent;
+}
+.modal-btn-ok{background:var(--blue);color:#fff;}
+.modal-btn-cancel{background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);}
+
+/* USER CHIP di appbar */
+.user-chip{
+  display:flex;align-items:center;gap:5px;
+  background:var(--blue-bg);border:1.5px solid #bfdbfe;
+  border-radius:20px;padding:3px 10px;
+  font-size:11px;font-weight:800;color:var(--blue);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* LOGOUT BTN di kasir bar */
+.logout-btn{
+  display:flex;align-items:center;gap:4px;
+  background:var(--red-bg);border:1.5px solid #fca5a5;
+  border-radius:8px;padding:3px 10px;
+  font-size:11px;font-weight:800;color:var(--red);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;font-family:inherit;
+}
 </style>
 </head>
 <body>
+
+<!-- ══ LOGIN SCREEN ═══════════════════════════════════ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">📒</div>
+      <div class="login-title">Buku Kas</div>
+      <div class="login-subtitle">Silakan pilih akun Anda</div>
+    </div>
+    <div class="login-body">
+
+      <!-- PILIH USER -->
+      <div id="userPicker">
+        <div class="user-label">Pilih Pengguna</div>
+        <div class="user-list">
+          <button class="user-btn" onclick="selectUser('Farhan')">
+            <div class="user-avatar">F</div>
+            <div><div class="user-info-name">Farhan</div><div class="user-info-status" id="status-Farhan">Memeriksa...</div></div>
+          </button>
+          <button class="user-btn" onclick="selectUser('Diki')">
+            <div class="user-avatar" style="background:linear-gradient(135deg,#059669,#047857)">D</div>
+            <div><div class="user-info-name">Diki</div><div class="user-info-status" id="status-Diki">Memeriksa...</div></div>
+          </button>
+          <button class="user-btn" onclick="selectUser('Aldo')">
+            <div class="user-avatar" style="background:linear-gradient(135deg,#7c3aed,#5b21b6)">A</div>
+            <div><div class="user-info-name">Aldo</div><div class="user-info-status" id="status-Aldo">Memeriksa...</div></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- INPUT PASSWORD -->
+      <div class="pw-section" id="pwSection">
+        <button class="pw-back" onclick="backToUserPicker()">← Kembali</button>
+        <div class="pw-who">
+          <div class="user-avatar" id="pwAvatar" style="width:34px;height:34px;font-size:14px">?</div>
+          <div>
+            <div class="pw-who-name" id="pwName">—</div>
+            <div class="pw-who-sub" id="pwSub">—</div>
+          </div>
+        </div>
+        <div class="pw-title" id="pwTitle">Masukkan Password</div>
+        <div class="pw-desc" id="pwDesc">Masukkan password Anda untuk masuk.</div>
+        <div class="pw-error" id="pwError">Password salah. Coba lagi.</div>
+        <div class="pw-field">
+          <input class="inp" type="password" id="pwInput" placeholder="Password..." autocomplete="current-password">
+          <button class="pw-toggle" onclick="togglePwVisible()" type="button" id="pwToggle">👁</button>
+        </div>
+        <div class="pw-field" id="pwConfirmWrap" style="display:none;">
+          <input class="inp" type="password" id="pwConfirm" placeholder="Ulangi password...">
+          <button class="pw-toggle" onclick="togglePwVisible2()" type="button">👁</button>
+        </div>
+        <button class="btn btn-b" id="pwSubmitBtn" onclick="submitPassword()">Masuk</button>
+        <div class="forgot-link" id="forgotLink" style="display:none;">
+          <button onclick="showForgotModal()">Lupa password?</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LUPA PASSWORD -->
+<div class="modal-overlay hidden" id="forgotModal">
+  <div class="modal-box">
+    <div class="modal-title">🔑 Reset Password</div>
+    <div class="modal-desc">Hubungi admin untuk mendapatkan <strong>kode reset</strong>, lalu masukkan kode di bawah ini untuk mereset password Anda.</div>
+    <div class="pw-field">
+      <input class="inp" type="text" id="resetCodeInput" placeholder="Masukkan kode reset..." style="text-align:center;letter-spacing:4px;font-family:'DM Mono',monospace;font-size:16px;text-transform:uppercase">
+    </div>
+    <div class="pw-error" id="resetError" style="display:block;">Kode salah atau sudah kadaluarsa.</div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" onclick="closeForgotModal()">Batal</button>
+      <button class="modal-btn modal-btn-ok" onclick="submitResetCode()">Reset Password</button>
+    </div>
+  </div>
+</div>
 
 <!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loadingOverlay">
@@ -353,8 +570,8 @@ select.inp{
 
 <!-- KASIR BAR -->
 <div class="kasir-bar">
-  👤 <span id="kasirName">—</span>
-  <button onclick="gantiKasir()">Ganti</button>
+  👤 Login sebagai: <span id="kasirName">—</span>
+  <button class="logout-btn" onclick="logout()">⏻ Keluar</button>
 </div>
 
 <!-- TAB NAV -->
@@ -627,13 +844,208 @@ function showToast(msg, type=''){
   clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-// ─── KASIR ───────────────────────────────────────────
-const getKasirName = () => localStorage.getItem('kasir_name') || 'Kasir';
-function setKasirName(name){ localStorage.setItem('kasir_name',name); setText('kasirName',name); }
-function gantiKasir(){
-  const n=prompt('Nama kasir / device ini:',getKasirName());
-  if(n&&n.trim()) setKasirName(n.trim());
+// ═══════════════════════════════════════════════════
+// AUTH SYSTEM
+// ═══════════════════════════════════════════════════
+const USERS_COL   = 'users';
+const ALLOWED     = ['Farhan','Diki','Aldo'];
+const AVATAR_CLR  = {Farhan:'linear-gradient(135deg,#3b82f6,#1d4ed8)',Diki:'linear-gradient(135deg,#059669,#047857)',Aldo:'linear-gradient(135deg,#7c3aed,#5b21b6)'};
+const RESET_CODE  = 'RESET2024'; // kode reset admin — bisa diganti
+
+let currentUser   = null;  // nama user yang sedang login
+let selectedUser  = null;  // user yang dipilih di picker
+let userPasswords = {};    // cache password hash dari Firestore
+
+// ─── SIMPLE HASH (bukan crypto, cukup untuk proteksi dasar) ──
+function hashPw(str){
+  let hash=0;
+  for(let i=0;i<str.length;i++){ hash=((hash<<5)-hash)+str.charCodeAt(i); hash|=0; }
+  return 'h'+Math.abs(hash).toString(36)+str.length.toString(36);
 }
+
+// ─── LOAD STATUS SEMUA USER DARI FIRESTORE ────────────
+async function loadUserStatuses(){
+  try{
+    const snap = await db.collection(USERS_COL).get();
+    snap.forEach(doc=>{ userPasswords[doc.id]=doc.data().pwHash||null; });
+    ALLOWED.forEach(name=>{
+      const el=document.getElementById('status-'+name);
+      if(el){
+        if(userPasswords[name]){
+          el.textContent='Password sudah diatur';
+          el.className='user-info-status set';
+        } else {
+          el.textContent='Belum pernah login — set password';
+          el.className='user-info-status';
+        }
+      }
+    });
+  } catch(e){
+    console.warn('Load user status error:',e);
+    ALLOWED.forEach(name=>{
+      const el=document.getElementById('status-'+name);
+      if(el){ el.textContent='Tidak dapat terhubung'; el.className='user-info-status'; }
+    });
+  }
+}
+
+// ─── PILIH USER ────────────────────────────────────────
+function selectUser(name){
+  selectedUser=name;
+  document.getElementById('userPicker').style.display='none';
+  const pw=document.getElementById('pwSection');
+  pw.classList.add('show');
+
+  // Avatar & nama
+  const av=document.getElementById('pwAvatar');
+  av.textContent=name[0];
+  av.style.background=AVATAR_CLR[name]||'#3b82f6';
+  setText('pwName',name);
+
+  const isNew=!userPasswords[name];
+  document.getElementById('pwInput').value='';
+  document.getElementById('pwConfirm').value='';
+  document.getElementById('pwError').classList.remove('show');
+  document.getElementById('pwInput').type='password';
+
+  if(isNew){
+    setText('pwSub','Akun baru');
+    setText('pwTitle','Buat Password Baru');
+    document.getElementById('pwDesc').textContent='Ini pertama kali Anda login. Buat password untuk akun Anda. Password tidak bisa direset sendiri.';
+    document.getElementById('pwConfirmWrap').style.display='';
+    setText('pwSubmitBtn','Buat Password & Masuk');
+    document.getElementById('forgotLink').style.display='none';
+  } else {
+    setText('pwSub','Masukkan password Anda');
+    setText('pwTitle','Masukkan Password');
+    document.getElementById('pwDesc').textContent='Masukkan password Anda untuk melanjutkan.';
+    document.getElementById('pwConfirmWrap').style.display='none';
+    setText('pwSubmitBtn','Masuk');
+    document.getElementById('forgotLink').style.display='';
+  }
+
+  setTimeout(()=>document.getElementById('pwInput').focus(),300);
+}
+
+function backToUserPicker(){
+  selectedUser=null;
+  document.getElementById('userPicker').style.display='';
+  document.getElementById('pwSection').classList.remove('show');
+  document.getElementById('pwError').classList.remove('show');
+}
+
+function togglePwVisible(){
+  const i=document.getElementById('pwInput');
+  i.type=i.type==='password'?'text':'password';
+}
+function togglePwVisible2(){
+  const i=document.getElementById('pwConfirm');
+  i.type=i.type==='password'?'text':'password';
+}
+
+// ─── SUBMIT PASSWORD ───────────────────────────────────
+async function submitPassword(){
+  const name   = selectedUser;
+  const pw     = document.getElementById('pwInput').value.trim();
+  const errEl  = document.getElementById('pwError');
+  errEl.classList.remove('show');
+
+  if(!pw||pw.length<4){
+    errEl.textContent='Password minimal 4 karakter.';
+    errEl.classList.add('show'); return;
+  }
+
+  const isNew=!userPasswords[name];
+  if(isNew){
+    // SET PASSWORD BARU
+    const conf=document.getElementById('pwConfirm').value.trim();
+    if(pw!==conf){
+      errEl.textContent='Password tidak cocok. Coba lagi.';
+      errEl.classList.add('show'); return;
+    }
+    const btn=document.getElementById('pwSubmitBtn');
+    btn.textContent='Menyimpan...'; btn.disabled=true;
+    try{
+      const h=hashPw(pw);
+      await db.collection(USERS_COL).doc(name).set({pwHash:h,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      userPasswords[name]=h;
+      loginSuccess(name);
+    } catch(e){
+      btn.textContent='Buat Password & Masuk'; btn.disabled=false;
+      errEl.textContent='Gagal menyimpan: '+e.message;
+      errEl.classList.add('show');
+    }
+  } else {
+    // CEK PASSWORD
+    if(hashPw(pw)===userPasswords[name]){
+      loginSuccess(name);
+    } else {
+      errEl.textContent='Password salah. Coba lagi.';
+      errEl.classList.add('show');
+      document.getElementById('pwInput').value='';
+      document.getElementById('pwInput').focus();
+    }
+  }
+}
+
+// Enter key submit
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&selectedUser) submitPassword(); });
+
+// ─── LOGIN SUCCESS ─────────────────────────────────────
+function loginSuccess(name){
+  currentUser=name;
+  localStorage.setItem('kasir_name',name);
+  setText('kasirName',name);
+  document.getElementById('loginScreen').classList.add('hidden');
+  // Mulai load data Firestore
+  startListener();
+}
+
+// ─── LOGOUT ────────────────────────────────────────────
+function logout(){
+  if(!confirm('Yakin ingin keluar dari akun '+currentUser+'?')) return;
+  currentUser=null; selectedUser=null;
+  if(unsubscribe){ unsubscribe(); unsubscribe=null; }
+  firestoreReady=false; data={};
+  // Reset login screen
+  backToUserPicker();
+  document.getElementById('loginScreen').classList.remove('hidden');
+  // Reload user statuses
+  loadUserStatuses();
+}
+
+// ─── LUPA PASSWORD ─────────────────────────────────────
+function showForgotModal(){
+  document.getElementById('resetCodeInput').value='';
+  document.getElementById('resetError').style.display='none';
+  document.getElementById('forgotModal').classList.remove('hidden');
+}
+function closeForgotModal(){ document.getElementById('forgotModal').classList.add('hidden'); }
+
+async function submitResetCode(){
+  const code=document.getElementById('resetCodeInput').value.trim().toUpperCase();
+  const errEl=document.getElementById('resetError');
+  errEl.style.display='none';
+  if(code!==RESET_CODE){
+    errEl.textContent='Kode salah atau sudah kadaluarsa.';
+    errEl.style.display='block'; return;
+  }
+  // Hapus password user ini dari Firestore
+  try{
+    await db.collection(USERS_COL).doc(selectedUser).delete();
+    userPasswords[selectedUser]=null;
+    closeForgotModal();
+    // Tampilkan form set password baru
+    selectUser(selectedUser);
+    showToast('✅ Password direset. Buat password baru.','success');
+  } catch(e){
+    errEl.textContent='Gagal reset: '+e.message;
+    errEl.style.display='block';
+  }
+}
+
+// ─── KASIR NAME (compat) ───────────────────────────────
+const getKasirName = () => currentUser || localStorage.getItem('kasir_name') || 'Kasir';
 
 // ─── FIREBASE SAVE ────────────────────────────────────
 async function save(){
@@ -775,12 +1187,10 @@ function toggleAcc(bdId,chvId){
   dp.addEventListener('change',renderInput);
   const tick=()=>setText('appClock',new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}));
   tick(); setInterval(tick,1000);
-  const saved=localStorage.getItem('kasir_name');
-  if(!saved){ const n=prompt('👤 Nama kasir / device ini?','Kasir 1'); setKasirName(n&&n.trim()?n.trim():'Kasir 1'); }
-  else setText('kasirName',saved);
-  // Jangan renderInput dulu — tunggu data dari Firestore
-  // startListener yang akan memanggil renderInput setelah data siap
-  startListener();
+
+  // Tampilkan login screen, load status user dari Firestore
+  // startListener hanya dipanggil setelah login berhasil
+  loadUserStatuses();
 })();
 
 // ─── RENDER INPUT ─────────────────────────────────────
