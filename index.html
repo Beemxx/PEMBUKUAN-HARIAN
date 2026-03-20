@@ -299,7 +299,7 @@ select.inp{
 .cell-tutup{white-space:normal;flex-wrap:wrap;gap:4px;min-width:160px;}
 
 /* Grid templates */
-.g-daily {grid-template-columns:28px 108px 80px 80px 90px 88px 88px minmax(155px,1fr);}
+  .g-daily {grid-template-columns:28px 120px 90px 90px 100px 100px 130px;}
 .g-detail{grid-template-columns:28px 88px 36px 58px 1fr 94px;}
 
 /* TOAST */
@@ -599,15 +599,18 @@ select.inp{
     <div class="sum-card"><div class="sum-ico">💵</div><div class="sum-lbl">Cash Masuk</div><div class="sum-val cg" id="sumCash">Rp 0</div></div>
     <div class="sum-card"><div class="sum-ico">📱</div><div class="sum-lbl">QRIS Masuk</div><div class="sum-val cb" id="sumQris">Rp 0</div></div>
     <div class="sum-card"><div class="sum-ico">🛒</div><div class="sum-lbl">Pengeluaran</div><div class="sum-val cr" id="sumKeluar">Rp 0</div></div>
-    <div class="sum-card sum-net"><div class="sum-lbl">💰 Saldo Bersih</div><div class="sum-val" id="sumNet">Rp 0</div></div>
+    <div class="sum-card sum-net">
+      <div class="sum-lbl">💰 Saldo Bersih</div>
+      <div class="sum-val" id="sumNet">Rp 0</div>
+      <div class="sum-info" style="color:var(--text3);font-size:9.5px">Cash + QRIS − Pengeluaran</div>
+    </div>
+    <div class="sum-card"><div class="sum-ico">🏪</div><div class="sum-lbl">Ditinggal di Kasir</div><div class="sum-val cy" id="sumKasir">Rp 0</div></div>
     <div class="sum-card"><div class="sum-ico">🏠</div><div class="sum-lbl">Dibawa Pulang</div><div class="sum-val co" id="sumPulang">Rp 0</div></div>
-    <div class="sum-card"><div class="sum-ico">🏪</div><div class="sum-lbl">Ke Kasir</div><div class="sum-val cy" id="sumKasir">Rp 0</div></div>
-    <div class="sum-card"><div class="sum-ico">📦</div><div class="sum-lbl">Terdistribusi</div><div class="sum-val cp" id="sumDistribusi">Rp 0</div></div>
-    <div class="sum-card" id="cardSelisih">
-      <div class="sum-ico">⚖️</div>
-      <div class="sum-lbl">Selisih Kas</div>
-      <div class="sum-val" id="sumSelisih">Rp 0</div>
-      <div class="sum-info" id="selisihInfo">Belum tutup buku</div>
+    <div class="sum-card" id="cardSelisih" style="grid-column:1/-1;">
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+        <div><div class="sum-lbl" style="margin-bottom:4px;">⚖️ Status Kas</div><div class="sum-info" id="selisihInfo">Belum tutup buku</div></div>
+        <div class="sum-val" id="sumSelisih" style="font-size:18px;">—</div>
+      </div>
     </div>
   </div>
 
@@ -680,10 +683,30 @@ select.inp{
         <div class="acc-chev" id="chTutup">▼</div>
       </div>
       <div class="acc-bd" id="aTutup">
-        <div class="row2">
-          <div class="field"><label>🏠 Cash Dibawa Pulang</label><input class="inp mono" type="number" id="pulangAmt" placeholder="0" inputmode="numeric" oninput="saveTutupLive()"></div>
-          <div class="field"><label>🏪 Cash ke Kasir</label><input class="inp mono" type="number" id="kasirAmt" placeholder="0" inputmode="numeric" oninput="saveTutupLive()"></div>
+
+        <!-- Uang ditinggal di kasir -->
+        <div class="field">
+          <label>🏪 Uang Ditinggal di Kasir (Rp)</label>
+          <input class="inp mono" type="number" id="kasirAmt" placeholder="0" inputmode="numeric" oninput="hitungTutup()">
+          <div style="font-size:11px;color:var(--text3);margin-top:5px;">Uang yang ditinggal di laci sebagai modal besok</div>
         </div>
+
+        <!-- Preview otomatis -->
+        <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rx);padding:13px 14px;margin-bottom:14px;" id="tutupPreview">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:12px;color:var(--text2);">Saldo Bersih</span>
+            <span style="font-family:'DM Mono',monospace;font-weight:700;font-size:13px;color:var(--green);" id="previewSaldo">Rp 0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:12px;color:var(--text2);">Ditinggal di Kasir</span>
+            <span style="font-family:'DM Mono',monospace;font-weight:700;font-size:13px;color:var(--yellow);" id="previewKasir">Rp 0</span>
+          </div>
+          <div style="border-top:1.5px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;font-weight:800;">🏠 Dibawa Pulang</span>
+            <span style="font-family:'DM Mono',monospace;font-weight:800;font-size:16px;color:var(--orange);" id="previewPulang">Rp 0</span>
+          </div>
+        </div>
+
         <button class="btn btn-p" id="btnTutup" onclick="confirmTutup()">💾 Simpan Tutup Buku</button>
       </div>
     </div>
@@ -723,12 +746,11 @@ select.inp{
   </div>
 
   <div class="rpt-cards">
-    <div class="rc"><div class="rc-l">💵 Total Cash</div><div class="rc-v cg" id="rsCash">Rp 0</div></div>
-    <div class="rc"><div class="rc-l">📱 Total QRIS</div><div class="rc-v cb" id="rsQris">Rp 0</div></div>
-    <div class="rc"><div class="rc-l">🛒 Total Keluar</div><div class="rc-v cr" id="rsKeluar">Rp 0</div></div>
+    <div class="rc"><div class="rc-l">📱 Total QRIS</div><div class="rc-v cb" id="rsQris">Rp 0</div><div style="font-size:9.5px;color:var(--text3);margin-top:3px;">Masuk rekening</div></div>
+    <div class="rc"><div class="rc-l">🛒 Total Pengeluaran</div><div class="rc-v cr" id="rsKeluar">Rp 0</div><div style="font-size:9.5px;color:var(--text3);margin-top:3px;">Dari uang cash</div></div>
     <div class="rc rc-net">
-      <div><div class="rc-l">💰 Saldo Bersih</div></div>
-      <div class="rc-v" id="rsNet">Rp 0</div>
+      <div><div class="rc-l">🏠 Total Dibawa Pulang</div></div>
+      <div class="rc-v co" id="rsNet">Rp 0</div>
     </div>
   </div>
 
@@ -736,26 +758,25 @@ select.inp{
   <div class="sheet-wrap" id="sheetDailyWrap">
     <div class="sheet-hd">Rekap Per Hari <span id="rptDayCnt"></span></div>
     <div class="s-scroll" style="max-height:400px;">
-      <div style="min-width:680px;">
+      <div style="min-width:665px;">
         <div class="sh-head g-daily">
-          <div>#</div><div>Tanggal</div>
+          <div>#</div>
+          <div>Tanggal</div>
           <div style="text-align:right">Cash</div>
           <div style="text-align:right">QRIS</div>
-          <div style="text-align:right">Total Masuk</div>
           <div style="text-align:right">Pengeluaran</div>
-          <div style="text-align:right">Saldo</div>
-          <div>Tutup Buku</div>
+          <div style="text-align:right">Saldo Bersih</div>
+          <div style="text-align:right">Dibawa Pulang</div>
         </div>
         <div id="sheetDailyBody"></div>
-        <div class="sh-total g-daily" id="sheetDailyTotal" style="display:none;min-width:680px;">
+        <div class="sh-total g-daily" id="sheetDailyTotal" style="display:none;min-width:665px;">
           <div class="sh-cell sh-rn">Σ</div>
           <div class="sh-cell sh-bold">TOTAL</div>
-          <div class="sh-cell sh-r cell-green" id="gtCash"></div>
-          <div class="sh-cell sh-r cell-blue"  id="gtQris"></div>
-          <div class="sh-cell sh-r sh-bold cell-green" id="gtIn"></div>
-          <div class="sh-cell sh-r cell-red"   id="gtOut"></div>
-          <div class="sh-cell sh-r sh-bold"    id="gtNet"></div>
-          <div class="sh-cell"></div>
+          <div class="sh-cell sh-r cell-green"  id="gtCash"></div>
+          <div class="sh-cell sh-r cell-blue"   id="gtQris"></div>
+          <div class="sh-cell sh-r cell-red"    id="gtOut"></div>
+          <div class="sh-cell sh-r sh-bold cell-green" id="gtNet"></div>
+          <div class="sh-cell sh-r cell-orange sh-bold" id="gtPulang"></div>
         </div>
       </div>
     </div>
@@ -1057,8 +1078,10 @@ async function save(){
       cash:   day.cash,
       qris:   day.qris,
       keluar: day.keluar,
+      modal:  day.modal ||0,
+      fisik:  day.fisik ||0,
+      kasir:  day.kasir ||0,
       pulang: day.pulang||0,
-      kasir:  day.kasir||0,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedBy: getKasirName()
     });
@@ -1107,8 +1130,10 @@ function startListener(){
           cash:   d.cash   ||[],
           qris:   d.qris   ||[],
           keluar: d.keluar ||[],
-          pulang: d.pulang ||0,
-          kasir:  d.kasir  ||0
+          modal:  d.modal  ||0,
+          fisik:  d.fisik  ||0,
+          kasir:  d.kasir  ||0,
+          pulang: d.pulang ||0
         };
       });
       firestoreReady = true;
@@ -1128,8 +1153,10 @@ function startListener(){
         cash:   d.cash   ||[],
         qris:   d.qris   ||[],
         keluar: d.keluar ||[],
-        pulang: d.pulang ||0,
-        kasir:  d.kasir  ||0
+        modal:  d.modal  ||0,
+        fisik:  d.fisik  ||0,
+        kasir:  d.kasir  ||0,
+        pulang: d.pulang ||0
       };
       changed=true;
     });
@@ -1198,34 +1225,59 @@ function renderInput(){
   const date=selDate(), day=getDay(date);
   setText('dateSubtitle', new Date(date+'T00:00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));
 
-  const tC=day.cash.reduce((s,e)=>s+e.amount,0);
-  const tQ=day.qris.reduce((s,e)=>s+e.amount,0);
-  const tK=day.keluar.reduce((s,e)=>s+e.amount,0);
-  const pulang=day.pulang||0, kasir=day.kasir||0;
-  const net=tC+tQ-tK, dist=pulang+kasir, selisih=net-dist;
+  const tC    = day.cash.reduce((s,e)=>s+e.amount,0);
+  const tQ    = day.qris.reduce((s,e)=>s+e.amount,0);
+  const tK    = day.keluar.reduce((s,e)=>s+e.amount,0);
+  const kasir = day.kasir  || 0;
 
-  setText('sumCash',fmt(tC)); setText('sumQris',fmt(tQ)); setText('sumKeluar',fmt(tK));
-  setText('sumPulang',fmt(pulang)); setText('sumKasir',fmt(kasir)); setText('sumDistribusi',fmt(dist));
-  setText('bCash',day.cash.length); setText('bQris',day.qris.length); setText('bKeluar',day.keluar.length);
+  // Saldo total (untuk laporan) = Cash + QRIS - Pengeluaran
+  const saldoTotal = tC + tQ - tK;
 
-  const netEl=document.getElementById('sumNet');
-  netEl.textContent=(net<0?'- ':'')+fmt(net);
-  netEl.className='sum-val '+(net>=0?'cg':'cr');
+  // Saldo FISIK (untuk tutup buku) = Cash - Pengeluaran (QRIS tidak ada fisiknya)
+  const saldoFisik = tC - tK;
 
-  const sEl=document.getElementById('sumSelisih');
-  const iEl=document.getElementById('selisihInfo');
-  const cEl=document.getElementById('cardSelisih');
-  sEl.textContent=(selisih<0?'- ':(selisih>0?'+ ':''))+fmt(selisih);
-  if(selisih===0&&dist===0){sEl.className='sum-val cp';iEl.textContent='Belum tutup buku';cEl.className='sum-card';}
-  else if(selisih===0){sEl.className='sum-val cg';iEl.textContent='✅ Kas balance';cEl.className='sum-card sel-ok';}
-  else if(selisih>0){sEl.className='sum-val co';iEl.textContent='⚠️ Kas kurang terdistribusi';cEl.className='sum-card sel-warn';}
-  else{sEl.className='sum-val cr';iEl.textContent='❌ Distribusi melebihi kas';cEl.className='sum-card sel-warn';}
+  // Dibawa pulang = Saldo Fisik - Ke Kasir
+  const pulang = kasir>0 ? Math.max(0, saldoFisik - kasir) : 0;
 
-  renderMT('cashTbl',day.cash,'cash','cg');
-  renderMT('qrisTbl',day.qris,'qris','cb');
-  renderMT('keluarTbl',day.keluar,'keluar','cr');
-  document.getElementById('pulangAmt').value=pulang||'';
-  document.getElementById('kasirAmt').value=kasir||'';
+  // Update summary cards
+  setText('sumCash',   fmt(tC));
+  setText('sumQris',   fmt(tQ));
+  setText('sumKeluar', fmt(tK));
+  setText('sumKasir',  kasir  ? fmt(kasir)  : '—');
+  setText('sumPulang', kasir>0 ? fmt(pulang) : '—');
+  setText('bCash',   day.cash.length);
+  setText('bQris',   day.qris.length);
+  setText('bKeluar', day.keluar.length);
+
+  const netEl = document.getElementById('sumNet');
+  netEl.textContent = (saldoTotal<0?'- ':'')+fmt(saldoTotal);
+  netEl.className   = 'sum-val '+(saldoTotal>=0?'cg':'cr');
+
+  // Status kas (hanya tampil setelah tutup buku)
+  const sEl = document.getElementById('sumSelisih');
+  const iEl = document.getElementById('selisihInfo');
+  const cEl = document.getElementById('cardSelisih');
+
+  if(!kasir){
+    sEl.textContent='—';
+    iEl.textContent='Belum tutup buku';
+    cEl.className='sum-card';
+  } else {
+    sEl.textContent = fmt(pulang);
+    sEl.className   = 'sum-val co';
+    iEl.textContent = '✅ Tutup buku selesai — Dibawa pulang '+fmt(pulang);
+    cEl.className   = 'sum-card sel-ok';
+  }
+
+  renderMT('cashTbl',   day.cash,   'cash',   'cg');
+  renderMT('qrisTbl',   day.qris,   'qris',   'cb');
+  renderMT('keluarTbl', day.keluar, 'keluar', 'cr');
+
+  // Isi field tutup buku
+  const kasirEl = document.getElementById('kasirAmt');
+  if(kasirEl) kasirEl.value = kasir||'';
+
+  hitungTutup();
 }
 
 function renderMT(id,entries,type,colorCls){
@@ -1259,15 +1311,47 @@ function addEntry(type){
 
 function delEntry(type,idx){ const d=getDay(selDate()); d[type].splice(idx,1); save(); renderInput(); }
 
-function saveTutupLive(){
-  const d=getDay(selDate());
-  d.pulang=parseFloat(document.getElementById('pulangAmt').value)||0;
-  d.kasir =parseFloat(document.getElementById('kasirAmt').value)||0;
-  save(); renderInput();
+// ─── HITUNG TUTUP (preview real-time) ────────────────
+function hitungTutup(){
+  const kasir = parseFloat(document.getElementById('kasirAmt')?.value)||0;
+  const date  = selDate();
+  const day   = getDay(date);
+
+  const tC   = day.cash.reduce((s,e)=>s+e.amount,0);
+  const tQ   = day.qris.reduce((s,e)=>s+e.amount,0);
+  const tK   = day.keluar.reduce((s,e)=>s+e.amount,0);
+  // Preview tutup buku pakai saldo FISIK saja (Cash - Pengeluaran)
+  const saldoFisik = tC - tK;
+  const pulang = Math.max(0, saldoFisik - kasir);
+
+  // Update preview
+  const ps = document.getElementById('previewSaldo');
+  const pk = document.getElementById('previewKasir');
+  const pp = document.getElementById('previewPulang');
+  if(ps) ps.textContent = fmt(saldoFisik);
+  if(pk) pk.textContent = fmt(kasir);
+  if(pp){
+    pp.textContent = fmt(pulang);
+    pp.style.color = pulang < 0 ? 'var(--red)' : 'var(--orange)';
+  }
 }
 
+// ─── SIMPAN TUTUP BUKU ───────────────────────────────
 function confirmTutup(){
-  saveTutupLive();
+  const kasir  = parseFloat(document.getElementById('kasirAmt').value)||0;
+  const date   = selDate();
+  const day    = getDay(date);
+  const tC        = day.cash.reduce((s,e)=>s+e.amount,0);
+  const tK        = day.keluar.reduce((s,e)=>s+e.amount,0);
+  // Tutup buku hanya dari Cash fisik (QRIS tidak ada fisiknya)
+  const saldoFisik = tC - tK;
+  const pulang     = Math.max(0, saldoFisik - kasir);
+
+  // Simpan kasir saja, pulang dihitung otomatis saat render
+  day.kasir  = kasir;
+  day.pulang = pulang; // tetap simpan sebagai referensi
+  save(); renderInput();
+
   const btn=document.getElementById('btnTutup');
   btn.textContent='✅ Tersimpan!';
   setTimeout(()=>btn.textContent='💾 Simpan Tutup Buku',2000);
@@ -1313,7 +1397,7 @@ function renderReport(){
   const lbl={today:'Hari Ini',week:'7 Hari Terakhir',month:'Bulan Ini',all:'Semua Data'};
   setText('reportSubtitle',lbl[range]+' — '+dates.length+' hari');
   setText('rptDayCnt',dates.length+' hari');
-  let tC=0,tQ=0,tK=0;
+  let tC=0,tQ=0,tK=0,tKasir=0,tPulang=0;
 
   if(currentView==='daily'){
     const body=document.getElementById('sheetDailyBody');
@@ -1321,35 +1405,36 @@ function renderReport(){
     if(!dates.length){ body.innerHTML='<div class="sh-empty">Belum ada data untuk periode ini</div>'; tot.style.display='none'; }
     else{
       body.innerHTML=dates.map((date,i)=>{
-        const d=data[date];
-        const cash=d.cash.reduce((s,e)=>s+e.amount,0);
-        const qris=d.qris.reduce((s,e)=>s+e.amount,0);
-        const keluar=d.keluar.reduce((s,e)=>s+e.amount,0);
-        const masuk=cash+qris, saldo=masuk-keluar;
-        tC+=cash; tQ+=qris; tK+=keluar;
-        const chips=[];
-        if(d.pulang) chips.push(`🏠 ${fmt(d.pulang)}`);
-        if(d.kasir)  chips.push(`🏪 ${fmt(d.kasir)}`);
-        const sc=saldo>=0?'cell-green':'cell-red';
+        const d      = data[date];
+        const cash   = d.cash.reduce((s,e)=>s+e.amount,0);
+        const qris   = d.qris.reduce((s,e)=>s+e.amount,0);
+        const keluar = d.keluar.reduce((s,e)=>s+e.amount,0);
+        const kasir      = d.kasir ||0;
+        const saldoTotal = cash+qris-keluar;  // untuk kolom Saldo Bersih
+        const saldoFisik = cash-keluar;        // cash saja untuk tutup buku
+        const pulang     = kasir>0 ? Math.max(0, saldoFisik-kasir) : 0;
+        tC+=cash; tQ+=qris; tK+=keluar; tKasir+=kasir; tPulang+=pulang;
+        const sudahTutup = kasir>0;
+        const statusEl   = sudahTutup
+          ? `<span style="font-size:10.5px;font-weight:700;color:var(--green)">✅ Selesai</span>`
+          : `<span style="font-size:10.5px;color:var(--text3)">Belum tutup</span>`;
         return `<div class="sh-row g-daily">
           <div class="sh-cell sh-rn">${i+1}</div>
           <div class="sh-cell sh-bold" style="font-size:11px">${fmtDate(date)}</div>
           <div class="sh-cell sh-r cell-green">${cash?fmt(cash):'—'}</div>
           <div class="sh-cell sh-r cell-blue">${qris?fmt(qris):'—'}</div>
-          <div class="sh-cell sh-r" style="color:#4a5068">${masuk?fmt(masuk):'—'}</div>
           <div class="sh-cell sh-r cell-red">${keluar?fmt(keluar):'—'}</div>
-          <div class="sh-cell sh-r sh-bold ${sc}">${saldo<0?'- ':''}${fmt(saldo)}</div>
-          <div class="sh-cell cell-tutup">${chips.length
-            ? chips.map(k=>`<span style="display:inline-flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;font-size:10.5px;color:var(--text2);white-space:nowrap;margin:2px">${k}</span>`).join('')
-            : '<span style="color:#8a90aa">—</span>'}</div>
+          <div class="sh-cell sh-r sh-bold ${saldoTotal>=0?'cell-green':'cell-red'}">${(saldoTotal<0?'- ':'')+fmt(saldoTotal)}</div>
+          <div class="sh-cell sh-r cell-orange sh-bold" style="flex-direction:column;align-items:flex-end;gap:2px;">${pulang?fmt(pulang):'—'}<span style="font-size:9.5px;font-weight:600;color:var(--text3)">${kasir?'kasir: '+fmt(kasir):''}</span><span style="font-size:9.5px;font-weight:700;color:${sudahTutup?'var(--green)':'var(--text3)'}">${sudahTutup?'✅':'Belum tutup'}</span></div>
         </div>`;
       }).join('');
-      const tIn=tC+tQ,tNet=tIn-tK;
       tot.style.display='';
-      setText('gtCash',fmt(tC)); setText('gtQris',fmt(tQ)); setText('gtIn',fmt(tIn)); setText('gtOut',fmt(tK));
+      const tSaldo=tC+tQ-tK;
+      setText('gtCash',fmt(tC)); setText('gtQris',fmt(tQ)); setText('gtOut',fmt(tK));
       const gn=document.getElementById('gtNet');
-      gn.textContent=(tNet<0?'- ':'')+fmt(tNet);
-      gn.className='sh-cell sh-r sh-bold '+(tNet>=0?'cell-green':'cell-red');
+      gn.textContent=(tSaldo<0?'- ':'')+fmt(tSaldo);
+      gn.className='sh-cell sh-r sh-bold '+(tSaldo>=0?'cell-green':'cell-red');
+      setText('gtPulang',fmt(tPulang));
     }
   } else {
     const body=document.getElementById('sheetDetailBody');
@@ -1379,10 +1464,11 @@ function renderReport(){
     setText('rptDetCnt',rowNum+' baris');
   }
 
-  setText('rsCash',fmt(tC)); setText('rsQris',fmt(tQ)); setText('rsKeluar',fmt(tK));
-  const netEl=document.getElementById('rsNet'), net=tC+tQ-tK;
-  netEl.textContent=(net<0?'- ':'')+fmt(net);
-  netEl.className='rc-v '+(net>=0?'cg':'cr');
+  setText('rsQris',   fmt(tQ));
+  setText('rsKeluar', fmt(tK));
+  const netEl=document.getElementById('rsNet');
+  netEl.textContent = tPulang ? fmt(tPulang) : 'Rp 0';
+  netEl.className   = 'rc-v co';
 }
 
 function tutupRow(num,date,label,amt,pc,cc){
