@@ -29,6 +29,25 @@ body{
   padding-bottom:76px;
 }
 
+/* LOADING OVERLAY */
+.loading-overlay{
+  position:fixed;inset:0;z-index:999;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(4px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;transition:opacity .3s;
+}
+.loading-overlay.hidden{opacity:0;pointer-events:none;}
+.spinner{
+  width:40px;height:40px;border-radius:50%;
+  border:3px solid #e2e5ef;
+  border-top-color:var(--blue);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;font-weight:700;color:var(--text2);}
+.loading-sub{font-size:12px;color:var(--text3);margin-top:-8px;}
+
 /* APP BAR */
 .appbar{
   position:sticky;top:0;z-index:100;
@@ -315,6 +334,13 @@ select.inp{
 </head>
 <body>
 
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Memuat data dari Firebase...</div>
+  <div class="loading-sub" id="loadingSub">Menghubungkan ke database</div>
+</div>
+
 <!-- APP BAR -->
 <div class="appbar">
   <div class="appbar-title">📒 Buku Kas</div>
@@ -564,12 +590,18 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
+// Nonaktifkan cache offline — data selalu dari Firestore server
+db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
+db.enableNetwork(); // pastikan selalu online
+
 const KAS_COL = 'kas';
 
 // ─── STATE ───────────────────────────────────────────
 let data = {};
 let currentView = 'daily';
 let unsubscribe = null;
+let firestoreReady = false; // flag: sudah terima data dari Firestore
 
 // ─── UTILS ───────────────────────────────────────────
 const fmt   = n => 'Rp ' + Math.abs(Math.round(n)).toLocaleString('id-ID');
@@ -607,45 +639,114 @@ function gantiKasir(){
 async function save(){
   const date=selDate(), day=data[date];
   if(!day) return;
+  showToast('⏳ Menyimpan...','');
   try{
     await db.collection(KAS_COL).doc(date).set({
-      cash:day.cash, qris:day.qris, keluar:day.keluar,
-      pulang:day.pulang||0, kasir:day.kasir||0,
-      updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
-      updatedBy:getKasirName()
+      cash:   day.cash,
+      qris:   day.qris,
+      keluar: day.keluar,
+      pulang: day.pulang||0,
+      kasir:  day.kasir||0,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: getKasirName()
     });
     setStatus('online');
+    showToast('✅ Tersimpan ke database','success');
   } catch(e){
-    console.error(e); setStatus('offline');
-    showToast('⚠️ Gagal sync ke Firebase','error');
-    localStorage.setItem('kas_backup_'+date,JSON.stringify(day));
+    console.error('Firebase error:', e);
+    setStatus('offline');
+    if(e.code==='permission-denied'){
+      showToast('❌ Gagal: Firebase Rules belum diatur','error');
+    } else if(e.code==='unavailable'||e.code==='network-request-failed'){
+      showToast('❌ Gagal: Tidak ada koneksi internet','error');
+    } else {
+      showToast('❌ Gagal tersimpan: '+e.code,'error');
+    }
   }
+}
+
+// ─── HIDE LOADING ─────────────────────────────────────
+function hideLoading(){
+  const ov=document.getElementById('loadingOverlay');
+  if(ov){ ov.classList.add('hidden'); setTimeout(()=>ov.remove(),400); }
 }
 
 // ─── REALTIME LISTENER ────────────────────────────────
 function startListener(){
   if(unsubscribe) unsubscribe();
   setStatus('connecting');
-  unsubscribe = db.collection(KAS_COL).onSnapshot(snap=>{
+  setText('loadingSub','Menghubungkan ke Firestore...');
+
+  // Gunakan server snapshot — tidak pakai cache
+  const options = { includeMetadataChanges: false };
+
+  unsubscribe = db.collection(KAS_COL).onSnapshot(options, snap=>{
     setStatus('online');
+
+    // Ini adalah data langsung dari Firestore server
+    // Reset data dan isi ulang dari snapshot penuh (bukan hanya changes)
+    // untuk memastikan semua data dari server
+    if(!firestoreReady){
+      // Pertama kali: load semua dokumen dari server
+      data = {}; // reset cache lokal
+      snap.forEach(doc=>{
+        const d=doc.data();
+        data[doc.id]={
+          cash:   d.cash   ||[],
+          qris:   d.qris   ||[],
+          keluar: d.keluar ||[],
+          pulang: d.pulang ||0,
+          kasir:  d.kasir  ||0
+        };
+      });
+      firestoreReady = true;
+      hideLoading();
+      renderInput();
+      populateMonthFilter();
+      return;
+    }
+
+    // Update berikutnya: apply changes saja
     let changed=false;
     snap.docChanges().forEach(ch=>{
       const date=ch.doc.id;
       if(ch.type==='removed'){ delete data[date]; changed=true; return; }
       const d=ch.doc.data();
-      data[date]={cash:d.cash||[],qris:d.qris||[],keluar:d.keluar||[],pulang:d.pulang||0,kasir:d.kasir||0};
+      data[date]={
+        cash:   d.cash   ||[],
+        qris:   d.qris   ||[],
+        keluar: d.keluar ||[],
+        pulang: d.pulang ||0,
+        kasir:  d.kasir  ||0
+      };
       changed=true;
     });
+
     if(changed){
-      renderInput(); populateMonthFilter();
+      renderInput();
+      populateMonthFilter();
       const lp=document.getElementById('page-laporan');
       if(lp&&lp.classList.contains('active')) renderReport();
+
+      // Notif kalau ada update dari device lain
       if(!snap.metadata.hasPendingWrites&&snap.docChanges().length>0){
-        const byOther=snap.docChanges().some(c=>{ const u=c.doc.data().updatedBy; return u&&u!==getKasirName(); });
+        const byOther=snap.docChanges().some(ch=>{
+          const u=ch.doc.data().updatedBy;
+          return u && u!==getKasirName();
+        });
         if(byOther) showToast('🔄 Data diupdate dari device lain');
       }
     }
-  }, err=>{ console.error(err); setStatus('offline'); showToast('⚠️ Koneksi terputus','error'); });
+  }, err=>{
+    console.error('Firestore error:',err);
+    setStatus('offline');
+    hideLoading();
+    if(err.code==='permission-denied'){
+      showToast('❌ Akses ditolak — cek Firebase Rules','error');
+    } else {
+      showToast('⚠️ Koneksi Firestore terputus','error');
+    }
+  });
 }
 
 // ─── NAVIGATION ──────────────────────────────────────
@@ -677,8 +778,9 @@ function toggleAcc(bdId,chvId){
   const saved=localStorage.getItem('kasir_name');
   if(!saved){ const n=prompt('👤 Nama kasir / device ini?','Kasir 1'); setKasirName(n&&n.trim()?n.trim():'Kasir 1'); }
   else setText('kasirName',saved);
+  // Jangan renderInput dulu — tunggu data dari Firestore
+  // startListener yang akan memanggil renderInput setelah data siap
   startListener();
-  renderInput();
 })();
 
 // ─── RENDER INPUT ─────────────────────────────────────
